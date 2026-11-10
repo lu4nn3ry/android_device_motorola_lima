@@ -10,4 +10,6 @@ LOCAL_PATH := device/motorola/lima_32
 $(call inherit-product, device/motorola/lima-common/common.mk)
 
 # Lima_32 specific configurations (Moto G8 Play - PRIORITY)
-# TODO: Add only lima_32-specific overlays, properties, packages after validation with stock firmware
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/rootdir/etc/fstab.mt6771:$(TARGET_COPY_OUT_RAMDISK)/fstab.mt6771 \
+    $(LOCAL_PATH)/rootdir/etc/recovery.fstab:$(TARGET_COPY_OUT_RECOVERY)/root/system/etc/recovery.fstab

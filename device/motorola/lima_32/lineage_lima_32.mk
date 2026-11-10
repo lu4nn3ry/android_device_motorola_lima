@@ -16,16 +16,17 @@ $(call inherit-product, device/motorola/lima_32/device.mk)
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 PRODUCT_NAME := lineage_lima_32
-PRODUCT_DEVICE := lima_32
+PRODUCT_DEVICE := lima
 PRODUCT_MANUFACTURER := motorola
 PRODUCT_BRAND := motorola
-PRODUCT_MODEL := Moto G8 Play
+PRODUCT_MODEL := moto g(8) play
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
 
-# TODO: Extract REAL values from stock firmware of your Moto G8 Play (lima_32)
-# Do NOT use placeholders in final builds
+# Verified properties extracted from official stock firmware (QMDS30.47-33-5)
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRIVATE_BUILD_DESC="lima_32-user 10 QMDS30.47-33-5 XXXXXXXX release-keys"
+    TARGET_DEVICE="lima" \
+    PRODUCT_NAME="lima_32" \
+    PRIVATE_BUILD_DESC="lima_32-user 10 QMDS30.47-33-5 7e278 release-keys"
 
-BUILD_FINGERPRINT := motorola/lima_32/lima_32:10/QMDS30.47-33-5/XXXXXXXX:user/release-keys
+BUILD_FINGERPRINT := motorola/lima_32/lima:10/QMDS30.47-33-5/7e278:user/release-keys

@@ -10,11 +10,20 @@ DEVICE_PATH := device/motorola/lima_32
 include device/motorola/lima-common/BoardConfigCommon.mk
 
 # Device-specific BoardConfig for Moto G8 Play (lima_32)
-# TODO: Fill values from stock firmware after validation
-# - Partitions (from stock fstab/partitions)
-# - Kernel cmdline/DTB
-# - Verified properties
-# - Recovery config if needed
+# Verified parameters extracted directly from official boot.img (QMDS30.47-33-5)
 TARGET_BOOTLOADER_BOARD_NAME := lima
-# TARGET_KERNEL_CONFIG := lima_32_defconfig
-# TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab  # only when file exists and validated
+
+# Boot image configuration
+BOARD_BOOT_HEADER_VERSION := 2
+BOARD_KERNEL_BASE := 0x40000000
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_OFFSET := 0x00008000
+BOARD_RAMDISK_OFFSET := 0x15000000
+BOARD_TAGS_OFFSET := 0x14000000
+BOARD_BOOTIMAGE_PARTITION_SIZE := 33554432
+BOARD_DTB_SIZE := 111400
+BOARD_KERNEL_CMDLINE := bootopt=64S3,32S1,32S1 buildvariant=user
+BOARD_INCLUDE_DTB_IN_BOOTIMG := true
+
+# Partitions & Fstab
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/recovery.fstab
