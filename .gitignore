@@ -1,0 +1,27 @@
+# Proprietary blobs
+vendor/*/proprietary/
+*.bin
+*.apk
+*.jar
+*.so
+!proprietary-files.txt
+
+# Build
+out/
+*.zip
+
+# Editors
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Kernel
+kernel/*/build/
+kernel/*/.config
+kernel/*/*.img
+
+# Local
+local_manifest.xml
+.ccls-cache/
+compile_commands.json
