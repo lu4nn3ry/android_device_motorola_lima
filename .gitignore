@@ -25,3 +25,5 @@ kernel/*/*.img
 local_manifest.xml
 .ccls-cache/
 compile_commands.json
+.env*
+dumps/
