@@ -9,21 +9,23 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
 # Inherit from device
+$(call inherit-product, device/motorola/lima-common/common.mk)
 $(call inherit-product, device/motorola/lima/device.mk)
-$(call inherit-product, device/motorola/lima/lima_32/device.mk)
 
 # Inherit some common Lineage stuff.
 $(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
-PRODUCT_NAME := lineage_lima_32
-PRODUCT_DEVICE := lima_32
+PRODUCT_NAME := lineage_lima
+PRODUCT_DEVICE := lima
 PRODUCT_MANUFACTURER := motorola
 PRODUCT_BRAND := motorola
-PRODUCT_MODEL := Moto G8 Play
+PRODUCT_MODEL := Motorola One Macro
 
 PRODUCT_GMS_CLIENTID_BASE := android-motorola
 
+# TODO: Extract REAL values from stock firmware of your Motorola One Macro (lima)
+# Do NOT use placeholders in final builds
 PRODUCT_BUILD_PROP_OVERRIDES += \
-    PRIVATE_BUILD_DESC="lima_32-user XX XX X XXXXXXXXXXX release-keys"
+    PRIVATE_BUILD_DESC="lima-user 10 XXXXXXXXXXX release-keys"
 
-BUILD_FINGERPRINT := motorola/lima_32/lima_32:XX/XX/X/XXXXXXXXXXX:user/release-keys
+BUILD_FINGERPRINT := motorola/lima/lima:10/XXXXXXXXXXX/XXXXXXXX:user/release-keys

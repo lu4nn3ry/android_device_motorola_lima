@@ -18,37 +18,44 @@ Monorepo unificado para desenvolvimento de ROMs Android para a família Motorola
 
 ```text
 android_device_motorola_lima/
-├── device/              # Device trees (comum + por variante)
+├── device/
 │   └── motorola/
-│       └── lima/
-│           ├── BoardConfigCommon.mk
+│       ├── lima-common/      # Configurações compartilhadas (apenas se comprovadamente idênticas)
+│       │   ├── BoardConfigCommon.mk
+│       │   ├── common.mk
+│       │   └── AndroidProducts.mk
+│       ├── lima/            # Motorola One Macro (suporte planejado)
+│       │   ├── BoardConfig.mk
+│       │   ├── device.mk
+│       │   └── lineage_lima.mk
+│       └── lima_32/         # Moto G8 Play (PRIORITÁRIO)
+│           ├── BoardConfig.mk
 │           ├── device.mk
-│           ├── AndroidProducts.mk
-│           ├── common/      # Configurações compartilhadas (validar compatibilidade)
-│           ├── lima/        # Específico Motorola One Macro
-│           └── lima_32/     # Específico Moto G8 Play (PRIORITÁRIO)
-├── kernel/              # Kernel source ou documentação de dependência
+│           └── lineage_lima_32.mk
+├── kernel/
 │   └── motorola/
 │       └── lima/
-├── vendor/              # Blobs proprietários (estrutura para extração)
+├── vendor/
 │   └── motorola/
 │       └── lima/
-├── recovery/            # Recovery separado (TWRP)
+├── recovery/
 │   └── twrp/
-├── patches/             # Patches locais organizados por componente
+├── patches/
 │   ├── device/
 │   ├── kernel/
 │   └── frameworks/
-├── manifest/            # Manifests XML para repo (se necessário)
-└── docs/                # Documentação técnica adicional
+├── manifest/
+├── docs/
+└── README.md
 ```
 
 ## Princípios de organização
 
-- **Separação por variante**: Configurações específicas ficam em `device/motorola/lima/lima/` ou `lima_32/`. Código compartilhado apenas quando comprovadamente compatível.
+- **Separação por variante**: Cada variante tem seu diretório próprio sob `device/motorola/`. Código compartilhado apenas quando comprovadamente compatível e justificado.
 - **TWRP isolado**: A configuração de recovery fica em `recovery/twrp/`, separada da configuração principal da ROM. Uma tree TWRP não é tratada como device tree completa de ROM.
 - **Sem submódulos Git**: Componentes necessários são incorporados diretamente ao monorepo quando viável, preservando histórico original quando possível.
 - **Foco em lima_32**: Todas as mudanças devem priorizar estabilidade do Moto G8 Play. Suporte a One Macro não deve introduzir regressões.
+- **Placeholders identificados**: Valores como fingerprint/build desc são placeholders - devem ser extraídos do firmware oficial.
 
 ## Dependências
 
@@ -63,7 +70,7 @@ Para build AOSP/ROM baseada em AOSP, são necessárias as dependências padrão:
 ### Opção 1: Monorepo único (componentes incorporados)
 Se os componentes foram incorporados diretamente neste repositório, basta clonar:
 ```bash
-git clone <repo-url> android_device_motorola_lima
+git clone https://github.com/lu4nn3ry/android_device_motorola_lima.git
 ```
 
 ### Opção 2: Usando `repo` com manifest
@@ -79,46 +86,32 @@ Documente branch/revisão exata no `manifest/` e em `docs/`.
 
 **ATENÇÃO**: Não redistribua blobs proprietários sem autorização. Blobs devem ser extraídos do firmware original do seu aparelho.
 
-### Estrutura preparada
-- `vendor/motorola/lima/` - destino dos blobs
-- Scripts de extração devem ser colocados conforme necessário (ex: `extract-files.sh`, `setup-makefiles.sh`)
-
-### Procedimento (genérico)
-1. Obtenha firmware oficial do seu dispositivo (mesma variante - lima ou lima_32)
-2. Copie os scripts de extração para o local apropriado ou use os fornecidos
-3. Execute a extração apontando para o dump/firmware
-4. Verifique `proprietary-files.txt`
-5. Nunca commite blobs proprietários neste repositório público
-
-Consulte `docs/extract-blobs.md` para detalhes específicos assim que disponíveis.
+Consulte [docs/extract-blobs.md](docs/extract-blobs.md) para o procedimento completo.
 
 ## Compilação do kernel
-Consulte `kernel/motorola/lima/README.md` e `docs/kernel.md` para:
-- Fonte do kernel recomendada (com justificativa)
-- Branch/commit
-- Toolchain
-- Defconfig por variante
-- Patches locais em `patches/kernel/`
+Consulte [docs/kernel.md](docs/kernel.md) e `kernel/motorola/lima/README.md` para fontes, defconfig, toolchain e patches.
 
 ## Build da ROM (orientativo)
-> **Nota:** Não assumimos que a ROM compila. Verificações reais de build não foram executadas neste estado.
+> **Nota:** Não assumimos que a ROM compila. Sem build verificado. Corrija estrutura e obtenha dados do firmware antes de tentar compilar.
 
 Orientativo genérico:
 ```bash
 source build/envsetup.sh
 # Exemplo para lima_32 (prioritário)
-lunch <rom>_lima_32-<buildtype>
+lunch lineage_lima_32-userdebug
 mka bacon  # ou target específico da ROM
 ```
-Os targets exatos dependem da ROM base utilizada e devem ser validados.
 
 ## Limitações conhecidas
 
-- **Repositórios auditados vazios/desatualizados**: Alguns repositórios investigados estão vazios ou desatualizados. Nenhum código foi importado cegamente.
+- **Estrutura reestruturada**: Nova organização seguindo convenções Android; caminhos de herança atualizados.
+- **Sem fstab/recovery validado**: `TARGET_RECOVERY_FSTAB` não definido em comum; adicionar por variante quando validado.
+- **Placeholders**: Fingerprint/build desc são placeholders - obter do firmware stock.
+- **Repos auditados vazios/desatualizados**: Alguns repositórios investigados estão vazios ou desatualizados. Nenhum código foi importado cegamente.
 - **Diferenças lima vs lima_32**: Não há comprovação total de paridade de hardware. Configurações não são compartilhadas por padrão.
-- **TWRP separado**: Trees TWRP investigadas servem como referência (partições/fstab/boot/recovery/DTB/DTBO/propriedades), mas não substituem device tree de ROM.
+- **TWRP separado**: Trees TWRP investigadas servem como referência, mas não substituem device tree de ROM.
 - **Blobs necessários**: Vendor proprietário deve vir do firmware do usuário.
-- **Sem build verificado**: Build não foi executado; caminhos/referências precisam validação em ambiente AOSP real.
+- **Sem build verificado**: Build não foi executado; priorize obter firmware e corrigir descobertas antes de compilar.
 
 ## Tabela de auditoria de repositórios
 
@@ -126,19 +119,17 @@ Os targets exatos dependem da ROM base utilizada e devem ser validados.
 |-------------|--------|--------|---------|------------|-----------------|
 | [mototek/device_motorola_lima](https://github.com/mototek/device_motorola_lima) | N/A (vazio) | N/A | Desconhecida | Device tree (referência) | **Não utilizável** - repositório vazio no momento da auditoria |
 | [mototek/recovery_motorola_lima](https://github.com/mototek/recovery_motorola_lima) | `lineage-18.1` | Verificar no repo | Desconhecida | TWRP/Recovery (referência) | **Referência apenas** - TWRP tree; útil para fstab/partições/boot/recovery. Não é device tree de ROM completa. |
-| [realaltffour/android_device_motorola_lima_twrp](https://github.com/ayham-1/android_device_motorola_lima_twrp) (fork ayham-1) | `master` | Verificar no repo | Desconhecida | TWRP (referência, fork) | **Referência apenas** - contém fstab/recovery config; revisar diferenças com mototek antes de usar. |
-| [twrpdtgen/android_device_motorola_lima](https://github.com/twrpdtgen/android_device_motorola_lima) | `lima_retail-user-10-QMD30.47-19-36205-release-keys` | Verificar no repo | Apache-2.0 (header presente) | Device tree gerado por twrpdtgen (referência) | **Referência apenas** - gerado automaticamente; validar contra hardware real. Pode conter informações úteis. |
-| [Jebaitedneko/android_kernel_motorola_lima](https://github.com/Jebaitedneko/android_kernel_motorola_lima) | `pie-9.0.0-release-pmd29` | ~586k+ commits no histórico (kernel base) | GPLv2 (COPYING Linux kernel) | Kernel source (MediaTek/Linux 4.x base) | **Candidato** - kernel base Android Pie para Lima. Precisa avaliação para ROMs modernas; verificar defconfig, DT, drivers. |
-| [electimon/android_kernel_motorola_lima](https://github.com/electimon/android_kernel_motorola_lima) | `12` | Verificar no repo | GPLv2 | Kernel source (branch 12) | **Candidato a investigar** - branch mais recente nomeada; comparar com Jebaitedneko (commits, patches, defconfig). Requer auditoria detalhada. |
+| [ayham-1/android_device_motorola_lima_twrp](https://github.com/ayham-1/android_device_motorola_lima_twrp) | `master` | Verificar no repo | Desconhecida | TWRP (referência, fork) | **Referência apenas** - contém fstab/recovery config; revisar diferenças. |
+| [twrpdtgen/android_device_motorola_lima](https://github.com/twrpdtgen/android_device_motorola_lima) | `lima_retail-user-10-QMD30.47-19-36205-release-keys` | Verificar no repo | Apache-2.0 | Device tree gerado (referência) | **Referência apenas** - gerado automaticamente; validar. Útil para scripts extract-files/setup-makefiles. |
+| [Jebaitedneko/android_kernel_motorola_lima](https://github.com/Jebaitedneko/android_kernel_motorola_lima) | `pie-9.0.0-release-pmd29` | Verificar no repo | GPLv2 | Kernel source (referência) | **Candidato** - base Android Pie/Linux 4.x. Avaliar para lima_32. |
+| [electimon/android_kernel_motorola_lima](https://github.com/electimon/android_kernel_motorola_lima) | `12` | Verificar no repo | GPLv2 | Kernel source (referência) | **Candidato** - branch 12, requer comparação detalhada com Jebaitedneko. |
 
-> *Licenças/commits devem ser verificados diretamente nos repositórios no momento do uso. Esta tabela reflete o estado observado na auditoria.*
-
-## Contribuição e manutenção
-
-- Mantenha alterações isoladas por variante quando possível.
-- Documente origem de qualquer código incorporado (URL, branch, commit, licença).
-- Não adicione blobs proprietários.
-- Priorize `lima_32`. Testes reais são necessários antes de declarar compatibilidade.
+## Ver também
+- [TODO.md](TODO.md) - Plano de correção e próximos passos
+- [docs/compatibility.md](docs/compatibility.md) - Relatório de compatibilidade
+- [docs/audit.md](docs/audit.md) - Auditoria detalhada
+- [docs/extract-blobs.md](docs/extract-blobs.md) - Extração de blobs
+- [docs/kernel.md](docs/kernel.md) - Kernel
 
 ## Licença
-Este monorepo segue as licenças dos componentes originais. Componentes de terceiros mantêm suas licenças respectivas. Verifique `COPYING`, headers e licenças em cada subdiretório.
+Este monorepo segue as licenças dos componentes originais. Componentes de terceiros mantêm suas licenças respectivas.

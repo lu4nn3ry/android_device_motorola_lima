@@ -5,8 +5,8 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lima_32/lineage_lima_32.mk \
-    $(LOCAL_DIR)/lima/lineage_lima.mk
+    $(LOCAL_DIR)/../lima_32/lineage_lima_32.mk \
+    $(LOCAL_DIR)/../lima/lineage_lima.mk
 
 COMMON_LUNCH_CHOICES := \
     lineage_lima_32-userdebug \
