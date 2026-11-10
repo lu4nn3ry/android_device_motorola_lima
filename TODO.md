@@ -1,69 +1,63 @@
 # TODO - Motorola Lima Monorepo
 
 ## Status Atual
-Estrutura organizada, mas **não pronta para compilação**. É um esqueleto inicial. Necessita reorganização e preenchimento com dados do firmware oficial.
+Estrutura reorganizada conforme convenções Android. Ainda **não pronta para compilação**. Faltam arquivos de herança e validação com firmware/ROM base.
 
-## Ordem de Correção (Recomendada)
+**ROM Base (planejada):** hackiosx.dev/porting (a definir versão Android exata)
+
+## Checklist da Próxima Etapa
 
 | Ordem | Tarefa | Prioridade | Status |
 |-------|--------|------------|--------|
-| 1 | **Reorganizar estrutura da Device Tree** - Mover para `device/motorola/lima/`, `lima_32/`, `lima-common/` conforme convenção Android | Crítica | Pendente |
-| 2 | **Corrigir caminhos e referências do BoardConfig** - Remover `TARGET_RECOVERY_FSTAB` até ter fstab validado; usar paths explícitos por variante | Crítica | Pendente |
-| 3 | **Obter firmware stock do Moto G8 Play (lima_32)** - Identificar partições, fstab, fingerprint, propriedades, versão Android | Crítica | Pendente |
-| 4 | **Extrair informações de partições e boot** - Validar tamanho partições, DTB/DTBO, cmdline, etc. | Alta | Pendente |
-| 5 | **Comparar fontes de kernel** - Avaliar Jebaitedneko (pie-9.0.0) vs electimon (branch 12); escolher com justificativa | Alta | Pendente |
-| 6 | **Preparar extração de vendor** - Criar/adaptar `extract-files.sh`, `setup-makefiles.sh`, mapear blobs necessários | Alta | Pendente |
-| 7 | **Preencher fingerprint e build description** - Usar valores reais do firmware do aparelho, NUNCA inventar | Média | Pendente |
-| 8 | **Validar recovery/boot** - Testar montagem, boot, descriptografia se aplicável | Média | Pendente |
-| 9 | **Primeiro build (lima_32)** - Compilar e corrigir erros progressivamente | Média | Pendente |
-| 10 | **Suporte ao One Macro (lima)** - Apenas após lima_32 inicializar ROM de teste; extrair apenas o realmente compartilhável | Baixa | Pendente |
+| 1 | Criar/corrigir heranças - garantir `device/motorola/lima/device.mk` existe e referências corretas | Crítica | **Feito** - `device/motorola/lima/device.mk` criado |
+| 2 | Corrigir `LOCAL_PATH` em `lima-common/common.mk` | Crítica | **Feito** - corrigido para `device/motorola/lima-common` |
+| 3 | Validar `AndroidProducts.mk` e descoberta de produtos pelo build system (`lunch`) | Crítica | Pendente |
+| 4 | Atualizar TODO.md e documentação antiga | Crítica | **Feito** - este arquivo atualizado |
+| 5 | Definir ROM-base exata e versão Android (hackiosx.dev/porting) | Crítica | Pendente - confirmar versão |
+| 6 | Obter firmware stock do Moto G8 Play (lima_32) | Crítica | Pendente |
+| 7 | Extrair propriedades e informações de partições/fstab/boot | Alta | Pendente |
+| 8 | Comparar e escolher fonte de kernel válida para a ROM base | Alta | Pendente |
+| 9 | Preparar extração de vendor/blobs (lima_32 primeiro) | Alta | Pendente |
+| 10 | Validar VNDK/configs conforme versão Android da ROM base | Média | Pendente |
+| 11 | Primeiro build do `lima_32` e correção progressiva | Média | Pendente |
+| 12 | Suporte ao One Macro (`lima`) apenas após boot funcional do lima_32 | Baixa | Pendente |
 
-## Pontos Críticos Identificados
+## Problemas Conhecidos e Correções
 
-### 1. Descoberta de BoardConfig
-- **Problema**: `PRODUCT_DEVICE := lima_32` mas estrutura atual pode não ser reconhecida corretamente pelo build system
-- **Solução**: Reorganizar para que cada variante tenha seu próprio diretório em `device/motorola/` com nomes reconhecíveis
+### Críticos (corrigidos nesta iteração)
+- [x] Estrutura reorganizada para `lima-common/`, `lima/`, `lima_32/`
+- [x] Removido `TARGET_RECOVERY_FSTAB` do comum até ter fstab validado
+- [x] Criado `device/motorola/lima/device.mk` (faltava)
+- [x] Corrigido `LOCAL_PATH` em `device/motorola/lima-common/common.mk`
 
-### 2. TARGET_RECOVERY_FSTAB
-- **Problema**: Definido em `BoardConfigCommon.mk` sem arquivo `recovery.fstab` existir, usando `$(LOCAL_PATH)` de forma insegura
-- **Solução**: Remover até ter fstab validado. Definir por variante com caminho explícito quando necessário
+### Pendentes
+- [ ] Validar descoberta de produtos (`lineage_lima_32`, `lineage_lima`) via `lunch`
+- [ ] Definir configs VNDK conforme versão Android da ROM base (evitar `BOARD_VNDK_VERSION := current` genérico sem confirmação)
+- [ ] Revisar `TARGET_CPU_VARIANT_RUNTIME` conforme plataforma/ROM
+- [ ] Obter fingerprint real do firmware stock
 
-### 3. Fingerprint placeholders
-- **Problema**: Valores `XX` placeholders em `lineage_lima_32.mk`
-- **Solução**: Extrair do firmware oficial do aparelho (ex: `lima_32_retail-user 10 QMDS30.47-33-5`)
-
-### 4. Documentação ausente
-- **Problema**: README referencia `docs/extract-blobs.md` e `docs/kernel.md` que não existem
-- **Solução**: Criar estes arquivos ou corrigir referências
-
-### 5. Configurações compartilhadas
-- **Problema**: Arquitetura/CPU/plataforma em comum sem validação entre variantes
-- **Solução**: Só compartilhar após comprovação. Kernel, partições, recovery melhor por variante ou com justificativa documentada
-
-## Estrutura Alvo Recomendada
+## Estrutura Atual (Correta)
 
 ```text
 device/motorola/
 ├── lima-common/
 │   ├── BoardConfigCommon.mk
 │   ├── common.mk
-│   └── ...
+│   └── AndroidProducts.mk
 ├── lima/
-│   ├── AndroidProducts.mk  (se necessário)
+│   ├── AndroidProducts.mk  (opcional/validar)
 │   ├── BoardConfig.mk
 │   ├── device.mk
 │   └── lineage_lima.mk
 └── lima_32/
-    ├── AndroidProducts.mk
+    ├── AndroidProducts.mk  (opcional/validar)
     ├── BoardConfig.mk
     ├── device.mk
     └── lineage_lima_32.mk
 ```
 
-**Nota:** Ajustar todos os caminhos de herança ao reorganizar.
-
 ## Recomendação Principal
-**Não começar pelo One Macro.** Primeiro fazer o `lima_32` inicializar uma ROM de teste. Depois extrair o que for realmente compartilhável entre variantes.
+**Não começar pelo One Macro.** Primeiro fazer o `lima_32` inicializar uma ROM de teste com a ROM base escolhida (hackiosx.dev/porting). Depois extrair o que for realmente compartilhável.
 
 **Objetivo:** Primeiro boot funcional do Moto G8 Play, não apenas compilação bem-sucedida.
 
